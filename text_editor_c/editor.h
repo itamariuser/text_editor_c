@@ -17,14 +17,16 @@ typedef struct
 	FILE* target_file; // file to edit
 
 	int line_length; // maximum line length
-
+	char* target_name;
 	HANDLE console_handle; // handle to the console for color printing
+	BYTE unsaved_changes;
 	
 } editor_memory;
 
-editor_memory editor_create(int cache_size);
+editor_memory editor_create(int cache_size, int lines_per_page);
 int editor_open_file(char* filename, editor_memory* editor);
 int editor_free(editor_memory* editor);
 int editor_start(editor_memory* editor);
 int editor_init_colors(editor_memory* editor);
 int cprint(editor_memory* ed, int color, const char * format, ...);
+int editor_print_console_top_ui(editor_memory* ed);

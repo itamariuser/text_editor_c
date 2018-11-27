@@ -1,13 +1,21 @@
 #include "editor.h"
-#include <conio.h>
+#ifdef _WIN32
+#define clrscreen() system("cls")
+#else
+#include <stdio.h>
+#define clrscreen() printf("\e[1;1H\e[2J")
+#endif
 
 /**
 D: Init a new editor without opening any files*/
-editor_memory editor_create(int cache_size)
+editor_memory editor_create(int cache_size, int lines_per_page)
 {
-	editor_memory ret_editor = { cache_size, 10, NULL, NULL, NULL };
+	if (lines_per_page <= 0)
+		lines_per_page = 10;
+	editor_memory ret_editor = { cache_size, lines_per_page, NULL, NULL, NULL };
 	ret_editor.cached_pages = list_create(0, cache_size);
 	ret_editor.line_length = 128;
+	ret_editor.unsaved_changes = FALSE;
 	return ret_editor;
 }
 
@@ -21,6 +29,7 @@ int editor_open_file(char* filename, editor_memory* editor)
 		perror("couldn't open file, error: ");
 		return -1;
 	}
+	editor->target_name = filename;
 	return editor->target_file;
 }
 
@@ -67,6 +76,7 @@ int editor_start(editor_memory * editor)
 		//printf("*****ALL PAGES: *****\n");
 		//list_print_lists(&editor->cached_pages);
 		//printf("\n");
+		editor->current_page = editor->cached_pages.arr[0];
 	}
 
 	free(read_line);
@@ -107,4 +117,32 @@ int cprint(editor_memory* ed, int color, const char * format, ...)
 	return result;
 
 
+}
+
+int editor_print_console_top_ui(editor_memory * ed)
+{
+	// warning: implementation depends on OS
+	clrscreen();
+
+	// display asterisk if unsaved
+	char* unsaved_asterisk = ed->unsaved_changes ? "*" : "";
+	//print top line 
+	cprint(ed, 110, "Itamar Sheffer C Editor v0.1            File: %s%s\n", ed->target_name, unsaved_asterisk);
+	return 0;
+}
+
+
+int editor_print_document(editor_memory* ed)
+{
+	// print current page and current line separately for easy editing
+	// TODO: print current line with current position marked in grey
+	// TODO: check current page and read new pages from file if needed
+	for(size_t line_num = 0; line_num < ed->lines_per_page; ++line_num)
+	{
+		text_line curr_line = ed->current_page->arr[line_num];
+		if (!curr_line)
+			break;
+		printf("%s\n", curr_line);
+	}
+	return 0;
 }
