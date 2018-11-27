@@ -16,6 +16,8 @@ editor_memory editor_create(int cache_size, int lines_per_page)
 	ret_editor.cached_pages = list_create(0, cache_size);
 	ret_editor.line_length = 128;
 	ret_editor.unsaved_changes = FALSE;
+	ret_editor.selec_mode = FALSE; // start with just cursor, not selecting
+	ret_editor.selec_len = 0;
 	return ret_editor;
 }
 
@@ -76,7 +78,10 @@ int editor_start(editor_memory * editor)
 		//printf("*****ALL PAGES: *****\n");
 		//list_print_lists(&editor->cached_pages);
 		//printf("\n");
+
+		// init some editor data
 		editor->current_page = editor->cached_pages.arr[0];
+		editor->cursor_pos = editor->current_page->arr[0]; // cursor on first char
 	}
 
 	free(read_line);
@@ -127,7 +132,7 @@ int editor_print_console_top_ui(editor_memory * ed)
 	// display asterisk if unsaved
 	char* unsaved_asterisk = ed->unsaved_changes ? "*" : "";
 	//print top line 
-	cprint(ed, 110, "Itamar Sheffer C Editor v0.1            File: %s%s\n", ed->target_name, unsaved_asterisk);
+	cprint(ed, 122, "Itamar Sheffer C Editor v0.1            File: %s%s\n", ed->target_name, unsaved_asterisk);
 	return 0;
 }
 
@@ -135,8 +140,10 @@ int editor_print_console_top_ui(editor_memory * ed)
 int editor_print_document(editor_memory* ed)
 {
 	// print current page and current line separately for easy editing
-	// TODO: print current line with current position marked in grey
+	// TODO: print current line with current position marked in gray
 	// TODO: check current page and read new pages from file if needed
+	// TODO: check if printing selected chars, if yes -> use cprint(110)
+	cprint(ed, 110, "%c", *ed->cursor_pos); // TEST
 	for(size_t line_num = 0; line_num < ed->lines_per_page; ++line_num)
 	{
 		text_line curr_line = ed->current_page->arr[line_num];

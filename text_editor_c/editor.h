@@ -19,7 +19,12 @@ typedef struct
 	int line_length; // maximum line length
 	char* target_name;
 	HANDLE console_handle; // handle to the console for color printing
-	BYTE unsaved_changes;
+	BYTE unsaved_changes; // TRUE if there are unsaved changes, FALSE otherwise
+
+	char* cursor_pos; // marks start of selection
+	BYTE selec_mode; // TRUE if selecting, FALSE otherwise
+	size_t selec_len; // length of selected chars, starts from selec_start
+
 	
 } editor_memory;
 
