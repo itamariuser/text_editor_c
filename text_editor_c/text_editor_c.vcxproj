@@ -115,11 +115,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="editor.h" />
+    <ClInclude Include="p_ed.h" />
     <ClInclude Include="list.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="editor.c" />
+    <ClCompile Include="p_ed.c" />
     <ClCompile Include="list.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
