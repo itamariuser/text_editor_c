@@ -1,4 +1,4 @@
-#include "p_ed.h"
+#include "editor.h"
 #ifdef _WIN32
 #define clrscreen() system("cls")
 #else
@@ -54,22 +54,24 @@ int editor_free(editor_memory* p_ed)
 
 int editor_populate_from_file(editor_memory * p_ed)
 {
-	text_line read_line = (char*)malloc(p_ed->line_length * sizeof(char));
+	text_line read_line;
+
+	read_line.start = (char*)malloc(p_ed->line_length * sizeof(char));
 	for (int page_num = 0; page_num < p_ed->cache_size; ++page_num)
 	{
 		//printf("page #%d:\n", page_num);
 		// create a new page and populate it
 		page new_page = list_create(0, p_ed->lines_per_page);
 		for (int line_num = 0; 
-			read_line &&
+			read_line.start &&
 			line_num < p_ed->lines_per_page;
 			++line_num)
 		{
-			if (!fgets(read_line, p_ed->line_length, p_ed->target_file))
+			if (!fgets(read_line.start, p_ed->line_length, p_ed->target_file))
 				break;
 			//printf("read line #%d: %s\n", line_num, read_line);
 			// append the dynamic read_line to editor page
-			list_append(&new_page, read_line, strlen(read_line)+1);
+			list_append(&new_page, read_line.start, strlen(read_line.start)+1);
 		}
 		printf("PAGE #%d: ",page_num);
 		list_print(&new_page);
@@ -87,13 +89,13 @@ int editor_populate_from_file(editor_memory * p_ed)
 		p_ed->selec_end.p_val = p_ed->cursor_pos;
 	}
 
-	free(read_line);
+	free(read_line.start);
 	return 0;
 }
 
 int editor_init_colors(editor_memory * p_ed)
 {
-	if (INVALID_HANDLE_VALUE == (p_ed->console_handle = GetStdHandle(STD_OUTPUT_HANDLE)))
+	if (INVALID_HANDLE_VALUE == (p_ed->h_console_output = GetStdHandle(STD_OUTPUT_HANDLE)))
 	{
 		perror("couldn't init console colors: ");
 		return -1;
@@ -111,17 +113,17 @@ int cprint(editor_memory* p_ed, int color, const char * format, ...)
 	static CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
 	static WORD saved_attributes;
 	// save prev console state
-	GetConsoleScreenBufferInfo(p_ed->console_handle, &consoleInfo);
+	GetConsoleScreenBufferInfo(p_ed->h_console_output, &consoleInfo);
 	saved_attributes = consoleInfo.wAttributes;
 
 	// print with variable args
-	SetConsoleTextAttribute(p_ed->console_handle, color);
+	SetConsoleTextAttribute(p_ed->h_console_output, color);
 	va_list args;
 	va_start(args, format);
 	int result = vprintf(format, args);
 
 	// restore prev console state
-	SetConsoleTextAttribute(p_ed->console_handle, saved_attributes);
+	SetConsoleTextAttribute(p_ed->h_console_output, saved_attributes);
 	return result;
 
 
@@ -153,8 +155,9 @@ int editor_run(editor_memory* p_ed)
 		clrscreen(); // warning: implementation depends on OS
 		editor_print_console_top_ui(p_ed);
 		editor_print_document(p_ed);
-		pos_inc(&p_ed->selec_start, p_ed);
-		Sleep(100);
+		Sleep(100); 
+		//p_ed->selec_start.p_val++;
+		//ReadConsoleInput(p_ed->h_console_input,)
 	}
 
 	// free resources and prepare for exit
@@ -179,8 +182,9 @@ int editor_print_document(editor_memory* p_ed)
 	cprint(p_ed, p_ed->selec_color, "%c", *p_ed->selec_start.p_val); // TEST
 	for(size_t line_num = 0; line_num < p_ed->lines_per_page; ++line_num)
 	{
-		text_line curr_line = p_ed->current_page->arr[line_num];
-		if (!curr_line)
+		text_line curr_line;
+		curr_line.start = p_ed->current_page->arr[line_num];
+		if (!curr_line.start)
 			break;
 		cprint(p_ed, p_ed->text_color,"%s\n", curr_line);
 	}

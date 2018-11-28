@@ -9,7 +9,11 @@ typedef struct
 	char* p_val; // char in the position
 } text_pos;
 
-typedef char* text_line;
+typedef struct
+{
+	char* start;
+	size_t len;
+} text_line;
 typedef list_t page; // list of text_line's
 typedef struct
 {
@@ -24,7 +28,8 @@ typedef struct
 
 	int line_length; // maximum line length
 	char* target_name;
-	HANDLE console_handle; // handle to the console for color printing
+	HANDLE h_console_output; // handle to the console for color printing
+	HANDLE h_console_input; // handle to the console for color printing
 	BYTE unsaved_changes; // TRUE if there are unsaved changes, FALSE otherwise
 
 	char* cursor_pos; // marks start of selection

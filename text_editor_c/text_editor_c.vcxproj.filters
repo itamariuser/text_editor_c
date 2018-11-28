@@ -18,7 +18,7 @@
     <ClInclude Include="list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="p_ed.h">
+    <ClInclude Include="editor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClCompile Include="list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="p_ed.c">
+    <ClCompile Include="editor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

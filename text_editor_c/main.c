@@ -1,4 +1,4 @@
-#include "p_ed.h"
+#include "editor.h"
 #include <conio.h>
 #include <stdio.h>
 
